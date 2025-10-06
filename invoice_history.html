@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>سجل الفواتير - Rasha Adel Beauty Center</title>
+  <style>
+    /* ====== الاستايل الداخلي ====== */
+    :root {
+      --bg: #fff7f9;
+      --rose: #e48fb1;
+      --rose-700: #d47a9f;
+      --gold: #d4af37;
+      --card: #fff;
+      --muted: #6b6b6b;
+      --text: #333;
+    }
+
+    body {
+      margin: 0;
+      font-family: 'Cairo', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      direction: rtl;
+    }
+
+    .sidebar {
+      position: fixed;
+      left: 0;
+      top: 0;
+      width: 230px;
+      height: 100vh;
+      background: linear-gradient(180deg, var(--rose-700), var(--gold));
+      color: #fff;
+      text-align: center;
+      padding-top: 30px;
+      box-shadow: 3px 0 10px rgba(0,0,0,0.2);
+    }
+
+    .sidebar-logo {
+      width: 100px;
+      border-radius: 50%;
+      margin-bottom: 15px;
+    }
+
+    .sidebar ul {
+      list-style: none;
+      padding: 0;
+    }
+
+    .sidebar ul li a {
+      display: block;
+      padding: 10px;
+      margin: 8px 10px;
+      color: white;
+      text-decoration: none;
+      border-radius: 8px;
+      transition: background 0.3s;
+    }
+
+    .sidebar ul li a:hover {
+      background: rgba(255, 255, 255, 0.2);
+    }
+
+    .main-content {
+      margin-left: 250px;
+      padding: 40px;
+    }
+
+    h1 {
+      color: var(--rose-700);
+      margin-bottom: 20px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 10px;
+      overflow: hidden;
+      box-shadow: 0 5px 20px rgba(0,0,0,0.05);
+    }
+
+    th {
+      background: var(--rose);
+      color: white;
+      padding: 12px;
+    }
+
+    td {
+      padding: 12px;
+      text-align: center;
+      border-bottom: 1px solid #f3e3ea;
+    }
+
+    tr:hover {
+      background: #fff0f5;
+    }
+
+    .footer-text {
+      text-align: center;
+      color: #a08a7a;
+      margin-top: 20px;
+      font-size: 14px;
+    }
+  </style>
+</head>
+
+<body>
+  <div class="sidebar">
+    <img src="assets/logo11.jpg" alt="Logo" class="sidebar-logo">
+    <ul>
+      <li><a href="dashboard.html">الصفحة الرئيسية</a></li>
+      <li><a href="invoice.html">إنشاء فاتورة</a></li>
+      <li><a href="invoices_list.html" class="active">سجل الفواتير</a></li>
+    </ul>
+  </div>
+
+  <div class="main-content">
+    <h1>📄 سجل الفواتير</h1>
+    <table>
+      <tr>
+        <th>رقم الفاتورة</th>
+        <th>اسم العميل</th>
+        <th>التاريخ</th>
+        <th>المتخصص</th>
+        <th>المبلغ</th>
+      </tr>
+      <tr>
+        <td>#001</td>
+        <td>سارة محمد</td>
+        <td>2025-10-06</td>
+        <td>مي أحمد</td>
+        <td>350 ج.م</td>
+      </tr>
+      <tr>
+        <td>#002</td>
+        <td>ليلى خالد</td>
+        <td>2025-10-05</td>
+        <td>نورا علي</td>
+        <td>480 ج.م</td>
+      </tr>
+    </table>
+
+    <p class="footer-text">© Rasha Adel Beauty Center & Designed by Mohamed Ali</p>
+  </div>
+</body>
+</html>
