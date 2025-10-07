@@ -126,21 +126,24 @@
         <th>المتخصص</th>
         <th>المبلغ</th>
       </tr>
-      <tr>
-        <td>#001</td>
-        <td>سارة محمد</td>
-        <td>2025-10-06</td>
-        <td>مي أحمد</td>
-        <td>350 ج.م</td>
-      </tr>
-      <tr>
-        <td>#002</td>
-        <td>ليلى خالد</td>
-        <td>2025-10-05</td>
-        <td>نورا علي</td>
-        <td>480 ج.م</td>
-      </tr>
+     
     </table>
+    <script>
+  // تحقق من نوع المستخدم
+  const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+
+  // لو مفيش مستخدم مسجل الدخول
+  if (!currentUser) {
+    alert('من فضلك قم بتسجيل الدخول أولًا');
+    location.href = 'index.html';
+  }
+
+  // لو المستخدم موظف، منعه من دخول صفحة الفواتير
+  if (currentUser.role === 'staff') {
+    alert('❌ هذه الصفحة مخصصة للمدير فقط');
+    location.href = 'dashboard_staff.html';
+  }
+</script>
 
     <p class="footer-text">© Rasha Adel Beauty Center & Designed by Mohamed Ali</p>
   </div>
