@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>ورقة الدور / Ticket — Rasha Adel</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    /* تصميم فاتورة صغيرة للطباعة */
+    .ticket {
+      width:260px; /* small receipt width */
+      padding:16px;
+      margin:20px auto;
+      background:#fff;
+      border-radius:8px;
+      box-shadow:0 8px 30px rgba(0,0,0,0.06);
+      text-align:center;
+      font-family: 'Cairo', sans-serif;
+    }
+    .ticket img{ height:60px; margin-bottom:8px }
+    .ticket h3{ margin:6px 0; color:#8b4b62 }
+    .ticket .line{ border-top:1px dashed #eee; margin:10px 0 }
+    .ticket .small{ font-size:12px; color:#666 }
+    .print-btn{ margin-top:10px }
+    @media print {
+      body *{ visibility:hidden }
+      .ticket, .ticket *{ visibility:visible }
+      .ticket{ position:relative; left:0; top:0; margin:0; box-shadow:none }
+    }
+  </style>
+</head>
+<body>
+  <div id="preview" style="padding:18px">
+    <!-- ticket will be injected here -->
+  </div>
+
+  <div style="text-align:center;margin-top:8px">
+    <button class="btn btn-primary print-btn" id="btnPrint" onclick="window.print()">طباعة الطِicket / Print</button>
+    <a class="btn btn-outline" href="bookings.html" style="margin-left:8px">العودة</a>
+  </div>
+
+<script>
+(function(){
+  function getBookings(){ return JSON.parse(localStorage.getItem('bookings')||'[]'); }
+  function getParam(name){ const params = new URLSearchParams(location.search); return params.get(name); }
+  const id = getParam('id');
+  if(!id){ document.getElementById('preview').innerHTML = '<p style="text-align:center;color:var(--muted)">لا يوجد حجز محدد</p>'; throw ''; }
+
+  const bookings = getBookings();
+  const b = bookings.find(x=>String(x.id)===String(id));
+  if(!b){ document.getElementById('preview').innerHTML = '<p style="text-align:center;color:var(--muted)">الحجز غير موجود</p>'; throw ''; }
+
+  // prepare ticket HTML (Arabic + English)
+  const html = `
+    <div class="ticket" id="ticketBox">
+      <img src="assets/logo11.jpg" alt="Rasha Adel">
+      <h3>Rasha Adel Beauty Center & Spa</h3>
+      <p class="small">ورقة الدور / Ticket</p>
+      <div class="line"></div>
+      <p><strong>الاسم / Name:</strong> ${escape(b.name)}</p>
+      <p><strong>الخدمة / Service:</strong> ${escape(b.serviceName)}</p>
+      <p><strong>التاريخ / Date:</strong> ${escape(b.date)}</p>
+      <p><strong>الوقت / Time:</strong> ${escape(b.time)}</p>
+      <div class="line"></div>
+      <h2 style="margin:10px 0">${ b.ticketNumber ? 'دور #' + b.ticketNumber : 'لم يُعطَ دور بعد' }</h2>
+      <p class="small">Ref: ${String(b.id).slice(-6)}</p>
+      <div class="line"></div>
+      <p class="small">© 2025 Rasha Adel — Designed & Developed by Mohamed Ali</p>
+    </div>
+  `;
+  document.getElementById('preview').innerHTML = html;
+
+  // mark printed / or update status when user presses print (optional)
+  // we add listener to window.onafterprint to mark printed flag
+  window.onafterprint = function(){
+    // set printed flag for this booking
+    const bookings = getBookings();
+    const idx = bookings.findIndex(x=>String(x.id)===String(id));
+    if(idx!==-1){
+      bookings[idx].printed = true;
+      bookings[idx].status = 'served';
+      localStorage.setItem('bookings', JSON.stringify(bookings));
+    }
+  };
+
+  // small helper
+  function escape(s){ return (s||'').toString().replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+})();
+</script>
+</body>
+</html>

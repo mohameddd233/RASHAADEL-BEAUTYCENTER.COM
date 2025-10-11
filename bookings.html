@@ -1,0 +1,131 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>الحجوزات / Bookings — Rasha Adel</title>
+  <link rel="stylesheet" href="assets/style.css">
+  <style>
+    .table-actions button{ margin-left:6px }
+    .small-muted{ color:var(--muted); font-size:13px }
+    .tickets-preview { max-width:760px; margin:18px auto }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand"><img src="assets/logo11.jpg" alt="Rasha Adel" style="height:56px;border-radius:10px"><h1>Rasha Adel</h1><p class="sub">Beauty Centre & Spa</p></div>
+    <nav class="nav">
+      <a class="nav-item" href="dashboard_admin.html">لوحة المدير</a>
+      <a class="nav-item" href="clients.html">سجل العملاء</a>
+      <a class="nav-item active" href="bookings.html">الحجوزات</a>
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <h2>الحجوزات / Bookings</h2>
+
+      <div class="panel">
+        <div style="display:flex;gap:12px;justify-content:space-between;align-items:center;margin-bottom:12px">
+          <div>
+            <input id="searchBooking" placeholder="ابحث بالاسم أو الهاتف أو الخدمة..." style="padding:8px;border-radius:8px;border:1px solid #eee">
+            <span class="small-muted" style="margin-left:8px">البحث • Search</span>
+          </div>
+          <div>
+            <button class="btn btn-outline" id="refreshBtn">تحديث</button>
+          </div>
+        </div>
+
+        <div id="bookingsContainer"></div>
+      </div>
+
+      <div class="footer-line">© 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali</div>
+    </div>
+  </main>
+
+<script>
+(function(){
+  // permissions: only staff or admin can view
+  const user = JSON.parse(localStorage.getItem('currentUser')||'null');
+  if(!user || (user.role!=='admin' && user.role!=='staff')){
+    alert('الصفحة للموظفين والمدير فقط — please login as staff or admin');
+    location.href = 'index.html';
+  }
+
+  function getBookings(){ return JSON.parse(localStorage.getItem('bookings')||'[]'); }
+  function saveBookings(b){ localStorage.setItem('bookings', JSON.stringify(b)); }
+
+  function renderTable(filter=''){
+    const bookings = getBookings().slice().reverse(); // show recent first
+    const container = document.getElementById('bookingsContainer');
+    let rows = bookings.filter(b=>{
+      if(!filter) return true;
+      const q = filter.toLowerCase();
+      return (b.name||'').toLowerCase().includes(q)  (b.phone||'').toLowerCase().includes(q)  (b.serviceName||'').toLowerCase().includes(q);
+    }).map((b,i)=>`
+      <tr>
+        <td>${bookings.length - i}</td>
+        <td>${escapeHtml(b.name)}</td>
+        <td>${escapeHtml(b.phone)}</td>
+        <td>${escapeHtml(b.serviceName)}</td>
+        <td>${escapeHtml(b.date)} ${escapeHtml(b.time)}</td>
+        <td>${b.status || 'new'}</td>
+        <td class="table-actions">
+          ${b.ticketNumber ? <strong>دور #${b.ticketNumber}</strong> : `<button class="btn btn-outline" onclick="assignTicket('${b.id}')">أعطِ دور</button>`}
+          <button class="btn btn-primary" onclick="previewTicket('${b.id}')">معاينة الدور</button>
+          <button class="btn btn-outline" onclick="deleteBooking('${b.id}')">حذف</button>
+        </td>
+      </tr>
+    `).join('');
+
+    container.innerHTML = `
+      <div style="overflow:auto">
+        <table class="table" style="min-width:900px">
+          <thead><tr><th>#</th><th>الاسم</th><th>الهاتف</th><th>الخدمة</th><th>التاريخ / الوقت</th><th>الحالة</th><th>إجراءات</th></tr></thead>
+          <tbody>
+            ${rows || '<tr><td colspan="7" style="padding:16px;text-align:center;color:var(--muted)">لا توجد حجوزات حالياً • No bookings yet</td></tr>'}
+          </tbody>
+        </table>
+      </div>
+    `;
+  }
+
+  // helpers
+  window.assignTicket = function(id){
+    const bookings = getBookings();
+    const idx = bookings.findIndex(b=>String(b.id)===String(id));
+    if(idx===-1) return alert('الحجز غير موجود');// compute next ticket number (per day) — simple increment global
+    let counter = parseInt(localStorage.getItem('ticketCounter')||'0',10);
+    counter = counter + 1;
+    localStorage.setItem('ticketCounter', String(counter));
+    bookings[idx].ticketNumber = counter;
+    bookings[idx].status = 'assigned';
+    saveBookings(bookings);
+    alert('✅ تم إعطاء رقم الدور: #' + counter);
+    renderTable(document.getElementById('searchBooking').value.trim());
+  };
+
+  window.previewTicket = function(id){
+    // open ticket preview page with id
+    window.open('ticket.html?id=' + encodeURIComponent(id), '_blank', 'noopener');
+  };
+
+  window.deleteBooking = function(id){
+    if(!confirm('تأكيد حذف الحجز؟')) return;
+    let bookings = getBookings();
+    bookings = bookings.filter(b=>String(b.id)!==String(id));
+    saveBookings(bookings);
+    renderTable(document.getElementById('searchBooking').value.trim());
+  };
+
+  function escapeHtml(s){ return (s||'').toString().replace(/[&<>"']/g, function(m){ return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]; }); }
+
+  // init
+  document.getElementById('searchBooking').addEventListener('input', function(){ renderTable(this.value.trim()); });
+  document.getElementById('refreshBtn').addEventListener('click', function(){ renderTable(''); });
+  renderTable('');
+})();
+</script>
+</body>
+</html>
