@@ -1,0 +1,221 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>إدارة الخدمات — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: url('background.jpg') center/cover fixed;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    .table th, .table td {
+      padding: 10px;
+      border: 1px solid #ddd;
+      background: #fff;
+      text-align: center;
+    }
+
+    .table th {
+      background-color: #f8f8f8;
+    }
+
+    .table tr:nth-child(even) {
+      background-color: #f2f2f2;
+    }
+
+    .table tr:hover {
+      background-color: #e6f7ff;
+    }
+
+    .form-box {
+      background: #fff;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+      margin-bottom: 20px;
+    }
+
+    .form-grid {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .form-group {
+      flex: 1;
+      min-width: 200px;
+    }
+
+    input {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+
+    button {
+      padding: 8px 16px;
+      border: none;
+      border-radius: 5px;
+      cursor: pointer;
+      background-color: #3498db;
+      color: white;
+      font-size: 14px;
+    }
+
+    button:hover {
+      background-color: #2980b9;
+    }
+
+    .btn-danger {
+      background-color: #e74c3c;
+    }
+
+    .btn-danger:hover {
+      background-color: #c0392b;
+    }
+
+    .footer-line {
+      text-align: center;
+      color: #a08a7a;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="dashboard_admin.html">لوحة المدير</a>
+      <a class="nav-item" href="clients.html">العملاء</a>
+      <a class="nav-item" href="invoice_admin.html">الفواتير</a>
+      <a class="nav-item" href="invoice_log.html">سجل الفواتير</a>
+      <a class="nav-item active" href="services.html">الخدمات</a>
+      <a class="nav-item" href="profits.html">حساب الأرباح</a>
+      <a class="nav-item" href="register_customer_admin.html">تسجيل عميل</a>
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <h2>إدارة الخدمات</h2>
+
+      <div id="adminPanel" class="form-box" style="display:none;">
+        <form id="svcForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اسم الخدمة</label>
+              <input id="svc_name" placeholder="اكتب اسم الخدمة">
+            </div>
+            <div class="form-group">
+              <label>السعر (ج)</label>
+              <input id="svc_price" type="number" placeholder="اكتب السعر">
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" type="submit">إضافة خدمة</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" id="servicesList"></div>
+
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    function renderServicesList() {
+      const services = window.app.getServices() || [];
+      const container = document.getElementById('servicesList');
+      const user = window.app.currentUser();
+
+      container.innerHTML = `
+        <h3>الخدمات الحالية</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم الخدمة</th>
+              <th>السعر (ج)</th>
+              ${user && user.role === 'admin' ? '<th>إجراء</th>' : ''}
+            </tr>
+          </thead>
+          <tbody>
+            ${services.map((s, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${s.name}</td>
+                <td>
+                  ${user && user.role === 'admin'
+                    ? `<input type="number" value="${s.price}" id="price_${s.id}" style="width:80px;text-align:center">`
+                    : s.price + ' ج'}
+                </td>
+                ${user && user.role === 'admin' ? `
+                  <td>
+                    <button class="btn btn-primary" onclick="updateService(${s.id})">تعديل</button>
+                    <button class="btn btn-danger" onclick="deleteService(${s.id})">حذف</button>
+                  </td>
+                ` : ''}
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function updateService(id) {
+      const inputEl = document.getElementById(`price_${id}`);
+      if (!inputEl) return alert('لم يتم العثور على حقل السعر');
+      const newPrice = parseFloat(inputEl.value);
+      if (isNaN(newPrice) || newPrice < 0) return alert('من فضلك أدخل سعر صحيح');
+      window.app.updateService(id, newPrice);
+      alert('تم تعديل السعر بنجاح ✅');
+      renderServicesList();
+    }
+
+    function deleteService(id) {
+      if (!confirm('هل أنت متأكد من حذف هذه الخدمة؟')) return;
+      window.app.deleteService(id);
+      renderServicesList();
+    }
+
+    document.getElementById('svcForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      const name = document.getElementById('svc_name').value.trim();
+      const price = parseFloat(document.getElementById('svc_price').value) || 0;
+      if (!name) return alert('من فضلك أدخل اسم الخدمة');
+      const id = Date.now(); // فريد لكل خدمة
+      window.app.addService({ id, name, price });
+      renderServicesList();
+      this.reset();
+    });
+
+    document.addEventListener('DOMContentLoaded', function() {
+      const user = window.app.currentUser();
+      if (user && user.role === 'admin') {
+        document.getElementById('adminPanel').style.display = 'block';
+      }
+      renderServicesList();
+    });
+  </script>
+</body>
+</html>

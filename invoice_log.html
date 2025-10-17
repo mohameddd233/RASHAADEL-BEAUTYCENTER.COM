@@ -1,0 +1,180 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>سجل الفواتير — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: url('background.jpg') center/cover fixed;
+      font-family: 'Cairo', sans-serif;
+    }
+    .table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+    .table th, .table td { padding: 10px; border: 1px solid #ddd; background: #fff; text-align:center; }
+    .table th { background-color:#f8f8f8; }
+    .table tr:nth-child(even) { background-color:#f2f2f2; }
+    .table tr:hover { background-color:#e6f7ff; }
+    .footer-line { text-align:center; color:#a08a7a; margin-top:30px; }
+    .search-bar { margin:20px 0; text-align:center; }
+    .search-bar input[type="text"], .search-bar input[type="date"], .search-bar select {
+      padding:10px; width:200px; border:1px solid #ccc; border-radius:5px; margin-left:10px;
+    }
+    .panel { overflow-x:auto; }
+    button { background:#e74c3c; color:white; border:none; padding:6px 10px; border-radius:5px; cursor:pointer; font-size:13px; }
+    button:hover { background:#c0392b; }
+    .export-buttons { text-align:center; margin-top:10px; }
+    .export-buttons button { background:#3498db; margin:0 5px; }
+    .export-buttons button:hover { background:#2980b9; }
+  </style>
+</head>
+<body>
+
+<aside class="sidebar">
+  <div class="brand">
+    <img src="logo11.jpg" alt="Rasha Adel">
+    <h1>Rasha Adel</h1>
+    <p class="sub">Beauty Centre & Spa</p>
+  </div>
+  <nav class="nav">
+    <a class="nav-item" href="dashboard_admin.html">لوحة المدير</a>
+    <a class="nav-item" href="clients.html">العملاء</a>
+    <a class="nav-item" href="invoice_admin.html">الفواتير</a>
+    <a class="nav-item active" href="invoice_log.html">سجل الفواتير</a>
+    <a class="nav-item" href="services.html">الخدمات</a>
+    <a class="nav-item" href="profits.html">حساب الأرباح</a>
+    <a class="nav-item" href="register_customer_admin.html">تسجيل عميل</a>
+    <a class="nav-item" href="index.html">تسجيل خروج</a>
+  </nav>
+</aside>
+
+<main class="main">
+  <div class="container">
+    <h2>📜 سجل الفواتير</h2>
+
+    <div class="search-bar">
+      <div class="search-container">
+        <input type="text" id="searchInput" placeholder="🔍 ابحث باسم العميل أو المتخصصة أو الرقم" oninput="renderInvoices()">
+        <input type="date" id="dateInput" onchange="renderInvoices()">
+        <select id="monthFilter" onchange="renderInvoices()">
+          <option value="">فلتر حسب الشهر</option>
+          <option value="0">يناير</option>
+          <option value="1">فبراير</option>
+          <option value="2">مارس</option>
+          <option value="3">أبريل</option>
+          <option value="4">مايو</option>
+          <option value="5">يونيو</option>
+          <option value="6">يوليو</option>
+          <option value="7">أغسطس</option>
+          <option value="8">سبتمبر</option>
+          <option value="9">أكتوبر</option>
+          <option value="10">نوفمبر</option>
+          <option value="11">ديسمبر</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="export-buttons">
+      <button onclick="exportToExcel()">📊 تصدير إلى Excel</button>
+    </div>
+
+    <div class="panel" id="invoicesList"></div>
+
+    <div class="footer-line">© 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali</div>
+  </div>
+</main>
+
+<script src="app.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+
+<script>
+function renderInvoices(){
+  const invoices = window.app.getInvoices() || [];
+  const container = document.getElementById('invoicesList');
+  const searchValue = document.getElementById('searchInput').value.trim().toLowerCase();
+  const dateValue = document.getElementById('dateInput').value;
+  const monthFilter = document.getElementById('monthFilter').value;
+
+  let filtered = invoices.filter(inv=>{
+    const clientName = (inv.client || '').toLowerCase();
+    const specialist = (inv.specialist || '').toLowerCase();
+    const total = inv.final || 0;
+    return !clientName.includes('تجرب') && !clientName.includes('test') && total > 0;
+  });
+
+  // فلتر اليوم
+  if(dateValue){
+    filtered = filtered.filter(inv => inv.date && inv.date.split('T')[0] === dateValue);
+  }
+
+  // فلتر الشهر
+  if(monthFilter !== ""){
+    filtered = filtered.filter(inv => inv.date && new Date(inv.date).getMonth() == monthFilter);
+  }
+
+  // البحث النصي
+  if(searchValue){
+    filtered = filtered.filter(inv=>{
+      const client = (inv.client || '').toLowerCase();
+      const specialist = (inv.specialist || '').toLowerCase();
+      const phone = (inv.phone || '').toLowerCase();
+      return client.includes(searchValue) || specialist.includes(searchValue) || phone.includes(searchValue);
+    });
+  }
+
+  if(filtered.length === 0){
+    container.innerHTML = '<p>لا توجد فواتير حالياً.</p>';
+    return;
+  }
+
+  container.innerHTML = `
+    <table class="table" id="invoiceTable">
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>اسم العميل</th>
+          <th>الخدمات</th>
+          <th>الموظف</th>
+          <th>الإجمالي قبل الخصم</th>
+          <th>الخصم</th>
+          <th>الإجمالي النهائي</th>
+          <th>التاريخ</th>
+          <th>إجراء</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${filtered.map((inv,i)=>`
+          <tr>
+            <td>${i+1}</td>
+            <td>${inv.client || ''}</td>
+            <td>${inv.services?.length ? inv.services.map(s=>`${s.name} × ${s.qty}`).join('<br>') : '—'}</td>
+            <td>${inv.specialist || 'غير محدد'}</td>
+            <td>${inv.total_before || 0} ج</td>
+            <td>${inv.discount || 0} ج</td>
+            <td>${inv.final || 0} ج</td>
+            <td>${new Date(inv.date).toLocaleDateString('ar-EG')}</td>
+            <td><button onclick="deleteInvoice(${inv.id}, '${inv.client || ''}')">🗑️ حذف</button></td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+function deleteInvoice(id,name){
+  if(!confirm(`هل أنت متأكد من حذف فاتورة العميل "${name}"؟`)) return;
+  window.app.deleteInvoice(id);
+  renderInvoices();
+}
+
+function exportToExcel(){
+  const table = document.getElementById("invoiceTable");
+  if(!table) return alert("لا توجد بيانات لتصديرها.");
+  const workbook = XLSX.utils.table_to_book(table,{sheet:"Invoices"});
+  XLSX.writeFile(workbook,"سجل_الفواتير.xlsx");
+}
+
+document.addEventListener('DOMContentLoaded', renderInvoices);
+</script>
+</body>
+</html>

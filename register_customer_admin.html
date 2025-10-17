@@ -1,0 +1,108 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>تسجيل عميل — موظف | Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- الشريط الجانبي -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="dashboard_admin.html">لوحة المدير</a>
+      <a class="nav-item" href="clients.html">العملاء</a>
+      <a class="nav-item" href="invoice_admin.html">الفواتير</a>
+      <a class="nav-item" href="invoice_log.html">سجل الفواتير</a>
+      <a class="nav-item" href="services.html">الخدمات</a>
+      <a class="nav-item" href="profits.html">حساب الأرباح</a>
+      <a class="nav-item active" href="register_customer_admin.html">تسجيل عميل</a>
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="main">
+    <div class="container register-page">
+      <div class="register-card form-box">
+        <h1 style="text-align:center">تسجيل عميل جديد</h1>
+        <h4 style="text-align:center;color:var(--muted);margin-bottom:18px">New Customer Registration</h4>
+        <form id="regForm">
+          <div class="form-grid">
+            <div>
+              <div class="form-group">
+                <label for="c_name">الاسم بالكامل</label>
+                <input id="c_name" required>
+              </div>
+              <div class="form-group">
+                <label for="c_phone">رقم الهاتف</label>
+                <input id="c_phone" required>
+              </div>
+              <div class="form-group">
+                <label for="c_email">البريد الإلكتروني (اختياري)</label>
+                <input id="c_email">
+              </div>
+            </div>
+            <div>
+              <div class="form-group">
+                <label for="c_address">العنوان</label>
+                <input id="c_address">
+              </div>
+              <div class="form-group">
+                <label for="c_health">ملاحظات صحية</label>
+                <textarea id="c_health" rows="4"></textarea>
+              </div>
+            </div>
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" type="submit">تسجيل العميل</button>
+          </div>
+        </form>
+      </div>
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <!-- سكريبتات -->
+  <script src="app.js"></script>
+  <script>
+    document.getElementById('regForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      // التقاط البيانات من الحقول
+      const name = document.getElementById('c_name').value.trim();
+      const phone = document.getElementById('c_phone').value.trim();
+      const email = document.getElementById('c_email').value.trim();
+      const address = document.getElementById('c_address').value.trim();
+      const healthNotes = document.getElementById('c_health').value.trim();
+
+      // تحقق من الحقول المطلوبة
+      if (!name || !phone) {
+        alert('⚠️ الرجاء إدخال الاسم ورقم الهاتف');
+        return;
+      }
+
+      // إضافة العميل إلى التخزين المحلي
+      window.app.addClient({
+        name: name,
+        phone: phone,
+        email: email,
+        address: address,
+        healthNotes: healthNotes
+      });
+
+      alert('✅ تم تسجيل العميل بنجاح');
+      this.reset();
+    });
+  </script>
+
+</body>
+</html>

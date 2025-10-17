@@ -1,0 +1,158 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>سجل العملاء — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body { font-family: 'Cairo', sans-serif; background: #f9f9f9; }
+    .search-box { margin: 20px 0; text-align:center; }
+    .search-box input { width: 250px; padding: 10px; font-size: 16px; border: 1px solid #ccc; border-radius:5px; }
+    .table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+    .table th, .table td { padding: 10px; border: 1px solid #ddd; text-align:center; background:#fff; }
+    .table th { background:#f2f2f2; }
+    .table tr:hover { background:#e6f7ff; }
+    .btn-details { background:#3498db; color:white; border:none; padding:5px 10px; border-radius:4px; cursor:pointer; }
+    .btn-details:hover { background:#2980b9; }
+    .modal { display:none; position:fixed; z-index:999; right:0; top:0; width:100%; height:100%; background:rgba(0,0,0,0.5); }
+    .modal-content { background:#fff; margin:10% auto; padding:20px; width:80%; max-width:500px; border-radius:5px; }
+    .close-btn { float:left; font-size:20px; font-weight:bold; cursor:pointer; color:#aaa; }
+    .close-btn:hover { color:red; }
+    .footer-line { text-align:center; margin-top:30px; color:#a08a7a; }
+  </style>
+</head>
+<body>
+ <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="dashboard_staff.html">لوحة الموظف</a>
+      <a class="nav-item" href="register_customer.html">تسجيل عميل</a>
+      <a class="nav-item" href="invoice.html">عمل فاتورة</a>
+        <a class="nav-item" href="invoice_log_employee.html">سجل الفواتير</a>
+          <a class="nav-item active" href="clients_log_staff.html">العملاء</a>
+
+
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+  <main class="main">
+    <div class="container">
+      <h2>سجل العملاء</h2>
+
+      <div class="search-box">
+        <input type="text" id="searchInput" placeholder="ابحث برقم الموبايل...">
+      </div>
+
+      <div class="panel">
+        <table class="table" id="clientsTable">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>الاسم</th>
+              <th>الهاتف</th>
+              <th>آخر تحديث</th>
+              <th>إجراء</th>
+            </tr>
+          </thead>
+          <tbody></tbody>
+        </table>
+      </div>
+
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <!-- Modal -->
+  <div id="clientModal" class="modal">
+    <div class="modal-content">
+      <span class="close-btn" id="closeModal">&times;</span>
+      <h3>تفاصيل العميل</h3>
+      <p><strong>الاسم:</strong> <span id="modalName"></span></p>
+      <p><strong>الهاتف:</strong> <span id="modalPhone"></span></p>
+      <p><strong>العنوان:</strong> <span id="modalAddress"></span></p>
+      <p><strong>الملاحظات الصحية:</strong> <span id="modalHealthNotes"></span></p>
+      <p><strong>تاريخ الإنشاء:</strong> <span id="modalCreated"></span></p>
+    </div>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const clients = window.app.getClients() || [];
+      const tbody = document.querySelector('#clientsTable tbody');
+      const searchInput = document.getElementById('searchInput');
+
+      const modal = document.getElementById('clientModal');
+      const modalName = document.getElementById('modalName');
+      const modalPhone = document.getElementById('modalPhone');
+      const modalAddress = document.getElementById('modalAddress');
+      const modalHealthNotes = document.getElementById('modalHealthNotes');
+      const modalCreated = document.getElementById('modalCreated');
+      const closeModal = document.getElementById('closeModal');
+
+      let filteredClients = [];
+
+      function renderTable(data) {
+        tbody.innerHTML = '';
+        if (data.length === 0) {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `<td colspan="5" style="text-align:center;">لا توجد بيانات حتى الآن</td>`;
+          tbody.appendChild(tr);
+        } else {
+          data.forEach((c, i) => {
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${i + 1}</td>
+              <td>${c.name}</td>
+              <td>${c.phone}</td>
+              <td>${new Date(c.created).toLocaleString('ar-EG')}</td>
+              <td><button class="btn-details" data-index="${i}">تفاصيل</button></td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      }
+
+      // البداية فارغة
+      renderTable([]);
+
+      // البحث برقم الموبايل
+      searchInput.addEventListener('input', function () {
+        const val = this.value.trim();
+        if (!val) {
+          renderTable([]);
+          return;
+        }
+        filteredClients = clients.filter(c => c.phone.includes(val));
+        renderTable(filteredClients);
+      });
+
+      // تفاصيل العميل
+      tbody.addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-details')) {
+          const index = e.target.getAttribute('data-index');
+          const client = filteredClients[index];
+          modalName.textContent = client.name;
+          modalPhone.textContent = client.phone;
+          modalAddress.textContent = client.address || "غير متوفر";
+          modalHealthNotes.textContent = client.healthNotes || "لا توجد ملاحظات";
+          modalCreated.textContent = client.created ? new Date(client.created).toLocaleString('ar-EG') : 'غير معروف';
+          modal.style.display = 'block';
+        }
+      });
+
+      // إغلاق المودال
+      closeModal.addEventListener('click', () => modal.style.display = 'none');
+      window.addEventListener('click', (e) => { if (e.target === modal) modal.style.display = 'none'; });
+    });
+  </script>
+
+</body>
+</html>

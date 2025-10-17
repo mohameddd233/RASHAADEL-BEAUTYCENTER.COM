@@ -1,0 +1,147 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <title>فاتورة عميل — Rasha Adel</title>
+  <style>
+    body {
+      font-family: "Cairo", sans-serif;
+      background: #fff;
+      color: #000;
+      direction: rtl;
+      padding: 10px;
+    }
+    .receipt {
+      width: 280px;
+      margin: auto;
+      padding: 10px;
+      border: 1px dashed #aaa;
+    }
+    .header {
+      text-align: center;
+      border-bottom: 1px dashed #aaa;
+      padding-bottom: 5px;
+      margin-bottom: 10px;
+    }
+    .header h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #c19a6b;
+    }
+    .header p {
+      margin: 3px 0;
+      font-size: 12px;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      padding: 5px;
+      text-align: center;
+    }
+    th {
+      border-bottom: 1px solid #ddd;
+    }
+    .total {
+      border-top: 1px dashed #aaa;
+      margin-top: 10px;
+      padding-top: 5px;
+      font-weight: bold;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+    .footer {
+      text-align: center;
+      margin-top: 10px;
+      font-size: 12px;
+      color: #555;
+    }
+    .print-btn {
+      display: block;
+      text-align: center;
+      margin: 15px auto;
+      background: #c19a6b;
+      color: white;
+      border: none;
+      padding: 8px 15px;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .print-btn:hover {
+      background: #b08a5e;
+    }
+    @media print {
+      body { padding: 0; }
+      .receipt { border: none; }
+      .footer, .print-btn { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="receipt" id="receipt">
+    <div class="header">
+      <h2>Rasha Adel Beauty Center</h2>
+      <p>💅 الجمال يبدأ من هنا</p>
+    </div>
+
+    <p><strong>العميلة:</strong> <span id="clientName">—</span></p>
+    <p><strong>التاريخ:</strong> <span id="date">—</span></p>
+
+    <table id="servicesTable">
+      <thead>
+        <tr><th>الخدمة</th><th>العدد</th><th>السعر</th></tr>
+      </thead>
+      <tbody></tbody>
+    </table>
+
+    <div class="total">
+      <div>الإجمالي قبل الخصم: <span id="totalBefore">0</span> ج</div>
+      <div>الخصم: <span id="discount">0</span> ج</div>
+      <div>الإجمالي بعد الخصم: <span id="totalFinal">0</span> ج</div>
+    </div>
+
+    <div class="footer">
+      تم بواسطة: <span id="employeeName">—</span><br>
+      شكراً لاختياركِ ❤️  
+      <br> Rasha Adel Beauty & Spa
+    </div>
+  </div>
+
+  <!-- زر الطباعة -->
+  <button class="print-btn" onclick="window.print()">🖨️ طباعة الفاتورة</button>
+
+  <script src="app.js"></script>
+  <script>
+    // جلب بيانات الفاتورة
+    const invoice = JSON.parse(localStorage.getItem('lastInvoice') || '{}');
+    const user = window.app?.currentUser ? window.app.currentUser() : null;
+
+    if (invoice.client) {
+      document.getElementById('clientName').innerText = invoice.client;
+      document.getElementById('date').innerText = invoice.date;
+
+      const tbody = document.querySelector('#servicesTable tbody');
+      invoice.services.forEach(s => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `<td>${s.name}</td><td>${s.qty}</td><td>${s.unit * s.qty}</td>`;
+        tbody.appendChild(tr);
+      });
+
+      // الإجماليات
+      document.getElementById('totalBefore').innerText = invoice.total_before?.toFixed(2) || invoice.final?.toFixed(2) || 0;
+      document.getElementById('discount').innerText = invoice.discount?.toFixed(2) || 0;
+      document.getElementById('totalFinal').innerText = invoice.final?.toFixed(2) || 0;
+
+      // اسم الموظف
+      document.getElementById('employeeName').innerText = user?.username || invoice.specialist || 'غير محدد';
+    } else {
+      document.body.innerHTML = '<p style="text-align:center">⚠️ لا توجد بيانات للفاتورة.</p>';
+    }
+  </script>
+
+</body>
+</html>

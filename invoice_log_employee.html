@@ -1,0 +1,170 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>استعلام عن فواتير العملاء — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+  <style>
+    body {
+      background: url('background.jpg') center/cover fixed;
+      font-family: 'Cairo', sans-serif;
+    }
+
+    .container {
+      margin: 40px auto;
+      max-width: 900px;
+      background: rgba(255, 255, 255, 0.9);
+      border-radius: 15px;
+      padding: 30px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    h2 {
+      text-align: center;
+      color: #444;
+    }
+
+    .search-bar {
+      text-align: center;
+      margin: 25px 0;
+    }
+
+    input[type="text"] {
+      padding: 10px;
+      width: 250px;
+      border: 1px solid #ccc;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    button {
+      padding: 10px 15px;
+      border: none;
+      background: #007bff;
+      color: white;
+      border-radius: 8px;
+      cursor: pointer;
+    }
+
+    button:hover { background: #0056b3; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      border: 1px solid #ddd;
+      padding: 10px;
+      text-align: center;
+    }
+
+    th {
+      background: #007bff;
+      color: white;
+    }
+
+    tr:nth-child(even) { background: #f9f9f9; }
+
+    tr:hover { background: #e6f7ff; }
+
+    .footer-line {
+      text-align: center;
+      color: #a08a7a;
+      margin-top: 30px;
+    }
+  </style>
+</head>
+<aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item" href="dashboard_staff.html">لوحة الموظف</a>
+      <a class="nav-item" href="register_customer.html">تسجيل عميل</a>
+      <a class="nav-item" href="invoice.html">عمل فاتورة</a>
+      <a class="nav-item active" href="invoice_log_employee.html">سجل الفواتير</a>
+    <a class="nav-item" href="clients_log_staff.html">العملاء</a>
+
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+<body>
+  <main class="main">
+    <div class="container">
+      <h2> استعلام عن فواتير العملاء</h2>
+
+      <div class="search-bar">
+        <input type="text" id="phoneInput" placeholder="أدخل رقم موبايل العميل...">
+        <button onclick="searchInvoices()">بحث</button>
+      </div>
+
+      <div id="invoicesList">
+        <p style="text-align:center;color:#777;">أدخل رقم الموبايل لعرض الفواتير الخاصة بالعميل.</p>
+      </div>
+
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    function searchInvoices() {
+      const phone = document.getElementById('phoneInput').value.trim();
+      const container = document.getElementById('invoicesList');
+
+      if (!phone) {
+        container.innerHTML = '<p style="text-align:center;">⚠️ من فضلك أدخل رقم الموبايل.</p>';
+        return;
+      }
+
+      const invoices = window.app?.getInvoices?.() || [];
+      const matched = invoices.filter(inv => (inv.phone || '').includes(phone));
+
+      if (matched.length === 0) {
+        container.innerHTML = '<p style="text-align:center;">❌ لا توجد فواتير لهذا الرقم.</p>';
+        return;
+      }
+
+      container.innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم العميل</th>
+              <th>رقم الموبايل</th>
+              <th>الخدمات</th>
+              <th>الموظف</th>
+              <th>الإجمالي</th>
+              <th>الخصم</th>
+              <th>الإجمالي بعد الخصم</th>
+              <th>التاريخ</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${matched.map((inv, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${inv.client || ''}</td>
+                <td>${inv.phone || ''}</td>
+                <td>${inv.services?.map(s => `${s.name} × ${s.qty}`).join('<br>') || '—'}</td>
+                <td>${inv.specialist || 'غير محدد'}</td>
+                <td>${inv.total_before || 0} ج</td>
+                <td>${inv.discount || 0} ج</td>
+                <td>${inv.final || 0} ج</td>
+                <td>${new Date(inv.date).toLocaleDateString('ar-EG')}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+  </script>
+</body>
+</html>

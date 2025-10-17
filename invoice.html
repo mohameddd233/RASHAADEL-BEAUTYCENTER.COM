@@ -1,0 +1,258 @@
+
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>عمل فاتورة — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css" />
+  <style>
+    .service-item {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px;
+      border-bottom: 1px solid #eee;
+      align-items: center;
+    }
+    .invoice-summary div {
+      margin-bottom: 8px;
+      font-size: 1.1rem;
+    }
+    input[type=number] {
+      width: 70px;
+      padding: 6px;
+      border-radius: 6px;
+      border: 1px solid #eee;
+      font-size: 1rem;
+    }
+    button.btn-primary {
+      padding: 10px 24px;
+      background-color: #007bff;
+      border: none;
+      border-radius: 6px;
+      color: white;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+    }
+    button.btn-primary:hover {
+      background-color: #0056b3;
+    }
+  </style>
+</head>
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel" />
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+     
+   <a class="nav-item" href="dashboard_staff.html">لوحة الموظف</a>
+      <a class="nav-item active" href="invoice.html"> عمل فاتورة</a>
+      <a class="nav-item" href="register_customer.html">تسجيل عميل</a>
+      <a class="nav-item" href="invoice_log_employee.html">سجل الفواتير</a>
+        <a class="nav-item" href="clients_log_staff.html">العملاء</a>
+
+
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <h2>عمل فاتورة جديدة</h2>
+
+      <div class="form-box">
+        <div class="form-group">
+          <label>اسم العميل</label>
+          <input id="inv_client" placeholder="اكتب اسم العميل أو اختاره" />
+        </div>
+
+        <div class="form-group">
+          <label>رقم الهاتف</label>
+          <input id="inv_phone" placeholder="رقم العميل" />
+        </div>
+
+        <div class="form-group">
+          <label>المتخصصة</label>
+          <input id="inv_specialist" placeholder="اسم المتخصصة" />
+        </div>
+
+        <div class="form-group">
+          <label>تاريخ الفاتورة</label>
+          <input id="inv_date" type="date" />
+        </div>
+
+        <h3>اختر الخدمات</h3>
+        <div class="services-grid" id="servicesGrid"></div>
+
+        <div class="invoice-summary" id="invoiceSummary">
+          <div>الإجمالي قبل الخصم: <strong id="sumBefore">0</strong> ج</div>
+          <div>الخصم: 
+            <input id="inv_discount" value="0" type="number" min="0" style="width:100px;padding:6px;border-radius:6px;border:1px solid #eee" />
+          </div>
+          <div style="margin-top:8px">
+            الإجمالي بعد الخصم: <strong id="sumAfter">0</strong> ج
+          </div>
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" id="saveInvoice">حفظ الفاتورة</button>
+          </div>
+        </div>
+      </div>
+
+      <p style="text-align:center;color:#a08a7a;margin-top:25px;">
+        © 2025 Rasha Adel Beauty Center & Spa — Designed & Developed by Mohamed Ali
+      </p>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // ✅ تعبئة تلقائية لبيانات العميل من الفواتير السابقة
+    function autoFillClientInfo() {
+      const phoneInput = document.getElementById('inv_phone');
+      const clientInput = document.getElementById('inv_client');
+      const specialistInput = document.getElementById('inv_specialist');
+
+      phoneInput.addEventListener('input', () => {
+        const phone = phoneInput.value.trim();
+        if (!phone) return;
+
+        const invoices = window.app.getInvoices() || [];
+        const previous = invoices.find(inv => inv.phone === phone);
+
+        if (previous) {
+          clientInput.value = previous.client || '';
+          specialistInput.value = previous.specialist || '';
+          console.log("تم العثور على عميل بنفس الرقم وتم تعبئة البيانات تلقائيًا.");
+        }
+      });
+
+      clientInput.addEventListener('input', () => {
+        const name = clientInput.value.trim().toLowerCase();
+        if (!name) return;
+
+        const invoices = window.app.getInvoices() || [];
+        const previous = invoices.find(inv => inv.client.toLowerCase() === name);
+
+        if (previous) {
+          document.getElementById('inv_phone').value = previous.phone || '';
+          specialistInput.value = previous.specialist || '';
+          console.log("تم العثور على عميل بنفس الاسم وتم تعبئة البيانات تلقائيًا.");
+        }
+      });
+    }
+
+    // ✅ عرض الخدمات
+    function renderServices() {
+      const services = window.app.getServices();
+      const grid = document.getElementById('servicesGrid');
+      grid.innerHTML = '';
+
+      services.forEach(s => {
+        const div = document.createElement('div');
+        div.className = 'service-item';
+        div.innerHTML = `
+          <div>
+            ${s.name} <div style="font-size:13px;color:var(--muted)">${s.price} ج</div>
+          </div>
+          <div>
+            <input type="number" min="0" value="0" data-id="${s.id}" />
+          </div>
+        `;
+        grid.appendChild(div);
+      });
+    }
+
+    // ✅ تحديث المجموع والخصم
+    function updateSummary() {
+      const services = window.app.getServices();
+      let sum = 0;
+      document.querySelectorAll('#servicesGrid input[type="number"]').forEach(inp => {
+        const qty = parseInt(inp.value) || 0;
+        const id = parseInt(inp.getAttribute('data-id'));
+        const svc = services.find(s => s.id === id);
+        if (qty > 0 && svc) sum += svc.price * qty;
+      });
+
+      document.getElementById('sumBefore').innerText = sum;
+      const disc = parseFloat(document.getElementById('inv_discount').value) || 0;
+      document.getElementById('sumAfter').innerText = Math.max(0, sum - disc);
+    }
+
+    // ✅ عند تحميل الصفحة
+    document.addEventListener('DOMContentLoaded', function () {
+      autoFillClientInfo(); // ← ميزة التعبئة التلقائية
+      renderServices();
+
+      document.getElementById('inv_date').valueAsDate = new Date();
+
+      document.getElementById('servicesGrid').addEventListener('input', updateSummary);
+      document.getElementById('inv_discount').addEventListener('input', updateSummary);
+
+      document.getElementById('saveInvoice').addEventListener('click', function () {
+        const client = document.getElementById('inv_client').value.trim();
+        const phone = document.getElementById('inv_phone').value.trim();
+        const specialist = document.getElementById('inv_specialist').value.trim() || (window.app.currentUser() && window.app.currentUser().username);
+        const date = document.getElementById('inv_date').value;
+
+        const services = [];
+        document.querySelectorAll('#servicesGrid input[type="number"]').forEach(inp => {
+          const qty = parseInt(inp.value) || 0;
+          if (qty > 0) {
+            const id = parseInt(inp.getAttribute('data-id'));
+            const svc = window.app.getServices().find(s => s.id === id);
+            if (svc) {
+              services.push({ id: svc.id, name: svc.name, unit: svc.price, qty });
+            }
+          }
+        });
+
+        let sum = 0;
+        services.forEach(s => sum += s.unit * s.qty);
+        const discount = parseFloat(document.getElementById('inv_discount').value) || 0;
+        const final = Math.max(0, sum - discount);
+
+        if (!client) {
+          alert('⚠️ الرجاء إدخال اسم العميل');
+          return;
+        }
+        if (services.length === 0) {
+          alert('⚠️ الرجاء اختيار خدمة واحدة على الأقل');
+          return;
+        }
+        if (!date) {
+          alert('⚠️ الرجاء تحديد تاريخ الفاتورة');
+          return;
+        }
+
+        const inv = {
+          id: Date.now(),
+          client,
+          phone,
+          specialist,
+          date,
+          services,
+          total_before: sum,
+          discount,
+          final
+        };
+
+        window.app.addInvoice(inv);
+        localStorage.setItem('lastInvoice', JSON.stringify(inv));
+        alert('✅ تم حفظ الفاتورة بنجاح');
+        window.location.href = "invoice_print.html";
+
+        document.getElementById('inv_client').value = '';
+        document.getElementById('inv_phone').value = '';
+        document.getElementById('inv_specialist').value = '';
+        document.querySelectorAll('#servicesGrid input[type="number"]').forEach(i => i.value = 0);
+        document.getElementById('inv_discount').value = '0';
+        updateSummary();
+      });
+    });
+  </script>
+</body>
+</html>

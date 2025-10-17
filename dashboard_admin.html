@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Admin Dashboard — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+
+    <nav class="nav">
+      <a class="nav-item active" href="dashboard_admin.html">لوحة المدير</a>
+      <a class="nav-item" href="clients.html">العملاء</a>
+      <a class="nav-item" href="invoice_admin.html">الفواتير</a>
+     <a class="nav-item" href="invoice_log.html">سجل الفواتير</a>
+      <a class="nav-item" href="services.html">الخدمات</a>
+      <a class="nav-item" href="profits.html">حساب الأرباح</a>
+      <a class="nav-item" href="register_customer_admin.html">تسجيل عميل</a>
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <div class="top">
+       
+        <div class="user">
+          مرحبًا، <strong>Admin</strong>
+        </div>
+      </div>
+
+      <h2>لوحة المدير</h2>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">عملاء</div>
+          <div class="card-number" id="adminClientsCount">0</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">فواتير</div>
+          <div class="card-number" id="adminInvoicesCount">0</div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">الخدمات</div>
+          <div class="card-number" id="adminServicesCount">0</div>
+        </div>
+      </div>
+
+      <div class="panel" id="adminPanels"></div>
+
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+
+  <script>
+    (function() {
+      const clients = window.app.getClients();
+      const invoices = window.app.getInvoices();
+      const services = window.app.getServices();
+
+      document.getElementById('adminClientsCount').innerText = clients.length;
+      document.getElementById('adminInvoicesCount').innerText = invoices.length;
+      document.getElementById('adminServicesCount').innerText = services.length;
+
+      const p = document.getElementById('adminPanels');
+      p.innerHTML = `
+        <div class="panel">
+          <h3>إجراءات سريعة</h3>
+          <p>
+            <a class="btn btn-primary" href="admin_users.html">إدارة المستخدمين</a>
+            <a class="btn btn-outline" href="services.html">إدارة الخدمات</a>
+          </p>
+        </div>
+      `;
+    })();
+  </script>
+</body>
+</html>

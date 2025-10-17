@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>Manage Users — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- الشريط الجانبي -->
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item active" href="dashboard_admin.html">لوحة المدير</a>
+      <a class="nav-item" href="clients.html">العملاء</a>
+      <a class="nav-item" href="invoice_admin.html">الفواتير</a>
+     <a class="nav-item" href="invoice_log.html">سجل الفواتير</a>
+      <a class="nav-item" href="services.html">الخدمات</a>
+      <a class="nav-item" href="profits.html">حساب الأرباح</a>
+      <a class="nav-item" href="register_customer_admin.html">تسجيل عميل</a>
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <!-- المحتوى الرئيسي -->
+  <main class="main">
+    <div class="container">
+      <h2>إضافة مستخدم جديد</h2>
+
+      <div class="form-box">
+        <form id="userForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label>اسم المستخدم</label>
+              <input id="u_name" required>
+            </div>
+
+            <div class="form-group">
+              <label>كلمة السر</label>
+              <input id="u_pass" type="password" required>
+            </div>
+
+            <div class="form-group">
+              <label>الصلاحية</label>
+              <select id="u_role">
+                <option value="staff">موظف</option>
+                <option value="admin">مدير</option>
+              </select>
+            </div>
+          </div>
+
+          <div style="margin-top:12px">
+            <button class="btn btn-primary" type="submit">إنشاء مستخدم</button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel" id="usersList"></div>
+
+      <div class="footer-line">
+        © 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali
+      </div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+
+  <script>
+    // عرض المستخدمين في الجدول
+    function renderUsers() {
+      const users = window.app.getUsers() || [];
+      const list = document.getElementById('usersList');
+
+      list.innerHTML = `
+        <h3>المستخدمون</h3>
+        <table class="table">
+          <thead>
+            <tr>
+              <th>#</th>
+              <th>اسم المستخدم</th>
+              <th>الصلاحية</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${users.map((u, i) => `
+              <tr>
+                <td>${i + 1}</td>
+                <td>${u.username}</td>
+                <td>${u.role}</td>
+              </tr>
+            `).join('')}
+          </tbody>
+        </table>
+      `;
+    }
+
+    // حفظ مستخدم جديد
+    document.getElementById('userForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+
+      const username = document.getElementById('u_name').value.trim();
+      const password = document.getElementById('u_pass').value.trim();
+      const role = document.getElementById('u_role').value;
+
+      if (!username || !password) {
+        alert('الرجاء إدخال اسم مستخدم وكلمة سر');
+        return;
+      }
+
+      const exists = (window.app.getUsers() || []).some(u => u.username === username);
+      if (exists) {
+        alert('اسم المستخدم موجود بالفعل');
+        return;
+      }
+
+      window.app.addUser({ username, password, role });
+      renderUsers();
+      this.reset();
+    });
+
+    document.addEventListener('DOMContentLoaded', renderUsers);
+  </script>
+  <script>
+  function renderUsers() {
+    const users = window.app.getUsers() || [];
+    const list = document.getElementById('usersList');
+
+    list.innerHTML = `
+      <h3>المستخدمون</h3>
+      <table class="table">
+        <thead>
+          <tr>
+            <th>#</th>
+            <th>اسم المستخدم</th>
+            <th>الصلاحية</th>
+            <th>إجراء</th>
+          </tr>
+        </thead>
+        <tbody>
+          ${users.map((u, i) => `
+            <tr>
+              <td>${i + 1}</td>
+              <td>${u.username}</td>
+              <td>${u.role}</td>
+              <td>
+                <button class="btn btn-outline" onclick="deleteUser('${u.username}')">حذف</button>
+              </td>
+            </tr>
+          `).join('')}
+        </tbody>
+      </table>
+    `;
+  }
+
+  // دالة الحذف
+  function deleteUser(username) {
+    if (confirm(`هل أنت متأكد أنك تريد حذف المستخدم ${username}؟`)) {
+      const users = window.app.getUsers() || [];
+      const updated = users.filter(u => u.username !== username);
+      localStorage.setItem('users', JSON.stringify(updated));
+      alert('✅ تم حذف المستخدم بنجاح');
+      renderUsers();
+    }
+  }
+
+  // عند الضغط على زر الإضافة
+  document.getElementById('userForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+
+    const username = document.getElementById('u_name').value.trim();
+    const password = document.getElementById('u_pass').value.trim();
+    const role = document.getElementById('u_role').value;
+
+    if (!username || !password) {
+      alert('الرجاء إدخال اسم مستخدم وكلمة سر');
+      return;
+    }
+
+    const exists = (window.app.getUsers() || []).some(u => u.username === username);
+    if (exists) {
+      alert('❗️ اسم المستخدم موجود بالفعل');
+      return;
+    }
+
+    window.app.addUser({ username, password, role });
+    alert('✅ تم إنشاء المستخدم بنجاح');
+    renderUsers();
+    this.reset();
+  });
+
+  document.addEventListener('DOMContentLoaded', renderUsers);
+</script>
+
+</body>
+</html>

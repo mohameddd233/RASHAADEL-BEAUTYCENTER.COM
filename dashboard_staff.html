@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="ar" dir="rtl">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <title>لوحة الموظف — Rasha Adel</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <aside class="sidebar">
+    <div class="brand">
+      <img src="logo11.jpg" alt="Rasha Adel">
+      <h1>Rasha Adel</h1>
+      <p class="sub">Beauty Centre & Spa</p>
+    </div>
+    <nav class="nav">
+      <a class="nav-item active" href="dashboard_staff.html">لوحة الموظف</a>
+      <a class="nav-item" href="register_customer.html">تسجيل عميل</a>
+      <a class="nav-item" href="invoice.html">عمل فاتورة</a>
+        <a class="nav-item" href="invoice_log_employee.html">سجل الفواتير</a>
+          <a class="nav-item" href="clients_log_staff.html">العملاء</a>
+
+
+      <a class="nav-item" href="index.html">تسجيل خروج</a>
+    </nav>
+  </aside>
+
+  <main class="main">
+    <div class="container">
+      <div class="top">
+        <div class="user">مرحبًا، <strong id="userName">Staff</strong></div>
+      </div>
+
+      <h2>لوحة الموظف</h2>
+
+      <div class="cards">
+        <div class="card">
+          <div class="card-title">مهام اليوم</div>
+          <div class="card-number">إنشاء فواتير / تسجيل عملاء</div>
+        </div>
+        <div class="card">
+          <div class="card-title">عملاء مسجلون</div>
+          <div class="card-number" id="staffClientsCount">0</div>
+        </div>
+      </div>
+
+      <div class="panel">
+        <p>استخدم القائمة الجانبية لعمل فاتورة جديدة أو تسجيل عميل.</p>
+      </div>
+
+      <div class="footer-line">© 2025 Rasha Adel Beauty Center & Spa – Designed & Developed by Mohamed Ali</div>
+    </div>
+  </main>
+
+  <script src="app.js"></script>
+  <script>
+    // التحقق من المستخدم
+    const currentUser = JSON.parse(localStorage.getItem("currentUser"));
+    if (!currentUser || currentUser.role !== "staff") {
+      // لو مش موظف، يرجع لصفحة الدخول
+      window.location.href = "index.html";
+    }
+
+    // عرض الاسم وعدد العملاء
+    document.getElementById("userName").innerText = currentUser.username;
+    document.getElementById("staffClientsCount").innerText = (window.app.getClients() || []).length;
+  </script>
+
+</body>
+</html>
