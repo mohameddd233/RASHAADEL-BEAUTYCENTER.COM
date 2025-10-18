@@ -64,7 +64,11 @@
   function currentUser() { return load('currentUser'); }
 
   // الخدمات
-  function getServices() { return load('services') || []; }
+  function getServices() {
+    const services = load('services') || [];
+    // ✅ ترتيب الخدمات حسب الحروف الأبجدية
+    return services.sort((a, b) => a.name.localeCompare(b.name, 'ar'));
+  }
 
   function addService(s) {
     const user = currentUser();
@@ -73,21 +77,30 @@
       return;
     }
     const ss = load('services') || [];
+    s.id = Date.now();
     ss.push(s);
     save('services', ss);
     return ss;
   }
 
-  function updateService(id, newPrice) {
+  // ✅ تعديل السعر أو الاسم أو الاثنين معًا
+  function updateService(id, newName, newPrice) {
     const user = currentUser();
     if (!user || user.role !== 'admin') {
-      alert('فقط المدير يمكنه تعديل الأسعار');
+      alert('فقط المدير يمكنه تعديل الخدمات');
       return;
     }
+
     const ss = getServices();
     const index = ss.findIndex(s => s.id === id);
+
     if (index !== -1) {
-      ss[index].price = parseFloat(newPrice) || 0;
+      if (newName && newName.trim() !== '') {
+        ss[index].name = newName.trim();
+      }
+      if (newPrice !== undefined && newPrice !== null && newPrice !== '') {
+        ss[index].price = parseFloat(newPrice) || 0;
+      }
       save('services', ss);
       return true;
     }
